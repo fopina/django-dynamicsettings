@@ -1,8 +1,17 @@
+VERSION = (0, 0, 2)
+__version__ = '%d.%d.%d' % VERSION
+
 import time
 
-from django.core.exceptions import ImproperlyConfigured, ValidationError
+try:
+    from django.core.exceptions import ImproperlyConfigured, ValidationError
+    import django
 
-default_app_config = 'dynamicsettings.apps.DynamicSettingsConfig'
+    if django.VERSION < (3, 2):
+        default_app_config = 'dynamicsettings.apps.DynamicSettingsConfig'
+except ModuleNotFoundError:
+    # allow import without having django, for setup.py and others
+    pass
 
 
 class DynamicSetting(object):
@@ -23,9 +32,7 @@ class DynamicSetting(object):
         if setting_name is None:
             setting_name = _guess_variable_name_()
         if setting_name is None:
-            raise ImproperlyConfigured(
-                'setting_name is required as it could not be inferred from its declaration'
-            )
+            raise ImproperlyConfigured('setting_name is required as it could not be inferred from its declaration')
         if setting_type is None:
             setting_type = type(setting_value)
             if setting_type not in (bool, str, int):
@@ -53,24 +60,6 @@ class DynamicSetting(object):
     def __setattr__(self, name, value):
         raise ValidationError('attributes not supported with DynamicSetting')
 
-    def __nonzero__(self):
-        return bool(self.__get_dyn_value__())
-
-    def __bool__(self):
-        return bool(self.__get_dyn_value__())
-
-    def __str__(self):
-        return str(self.__get_dyn_value__())
-
-    def __repr__(self):
-        return repr(self.__get_dyn_value__())
-
-    def __hash__(self):
-        return hash(self.__get_dyn_value__())
-
-    def __eq__(self, other):
-        return self.__get_dyn_value__() == other
-
     def __get_dyn_value__(self):
         self.__load_cache__()
 
@@ -91,10 +80,7 @@ class DynamicSetting(object):
         # for lower CACHE_TTLs (as casting values that will not be used...)
         # if cache is at "instance" level instead of class level, then it would be the same
         # but a DB query would be made for each setting...
-        cls.__cache__ = {
-            s.name: cls.cast_type(s.value, name=s.name)
-            for s in Setting.objects.filter(active=True)
-        }
+        cls.__cache__ = {s.name: cls.cast_type(s.value, name=s.name) for s in Setting.objects.filter(active=True)}
         cls.__last__cache__ = time.time()
 
     @classmethod
@@ -115,9 +101,7 @@ class DynamicSetting(object):
     def cast_type(cls, value, name=None, _type=None):
         if _type is None:
             if name is None or name not in cls.__registry__:
-                raise ValidationError(
-                    '%(name)s is not a valid setting', params={'name': name}
-                )
+                raise ValidationError('%(name)s is not a valid setting', params={'name': name})
             _type = cls.__registry__.get(name)
         if _type is bool and isinstance(value, str):
             if value.lower() in ('true', 'yes', '1'):
@@ -130,6 +114,79 @@ class DynamicSetting(object):
         # utility method to reset class-level variables (useful for unit-testing - or stuff even hackier than this)
         cls.__cache__ = {}
         cls.__last__cache__ = 0
+
+    # dull/proxy implementation of all operators... maybe there is an easier way...?
+    def __nonzero__(self):
+        return bool(self.__get_dyn_value__())
+
+    def __bool__(self):
+        return bool(self.__get_dyn_value__())
+
+    def __str__(self):
+        return str(self.__get_dyn_value__())
+
+    def __repr__(self):
+        return repr(self.__get_dyn_value__())
+
+    def __hash__(self):
+        return hash(self.__get_dyn_value__())
+
+    def __add__(self, other):
+        return self.__get_dyn_value__() + other
+
+    def __sub__(self, other):
+        return self.__get_dyn_value__() - other
+
+    def __mul__(self, other):
+        return self.__get_dyn_value__() * other
+
+    def __pow__(self, other):
+        return self.__get_dyn_value__() ** other
+
+    def __truediv__(self, other):
+        return self.__get_dyn_value__() / other
+
+    def __floordiv__(self, other):
+        return self.__get_dyn_value__() // other
+
+    def __mod__(self, other):
+        return self.__get_dyn_value__() % other
+
+    def __lshift__(self, other):
+        return self.__get_dyn_value__() << other
+
+    def __rshift__(self, other):
+        return self.__get_dyn_value__() >> other
+
+    def __and__(self, other):
+        return self.__get_dyn_value__() & other
+
+    def __or__(self, other):
+        return self.__get_dyn_value__() | other
+
+    def __xor__(self, other):
+        return self.__get_dyn_value__() ^ other
+
+    def __invert__(self):
+        return ~self.__get_dyn_value__()
+
+    def __lt__(self, other):
+        return self.__get_dyn_value__() < other
+
+    def __le__(self, other):
+        return self.__get_dyn_value__() <= other
+
+    def __eq__(self, other):
+        return self.__get_dyn_value__() == other
+
+    def __ne__(self, other):
+        return self.__get_dyn_value__() != other
+
+    def __gt__(self, other):
+        return self.__get_dyn_value__() > other
+
+    def __ge__(self, other):
+        return self.__get_dyn_value__() >= other
 
 
 def _guess_variable_name_():

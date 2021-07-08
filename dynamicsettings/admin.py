@@ -5,9 +5,7 @@ from dynamicsettings import models, DynamicSetting
 
 
 class SettingForm(forms.ModelForm):
-    name = forms.ChoiceField(
-        choices=[(x, x) for x in sorted(DynamicSetting.get_registry().keys())]
-    )
+    name = forms.ChoiceField(choices=[(x, x) for x in sorted(DynamicSetting.get_registry().keys())])
 
 
 @admin.register(models.Setting)

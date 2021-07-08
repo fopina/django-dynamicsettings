@@ -1,8 +1,17 @@
+VERSION = (0, 0, 2)
+__version__ = '%d.%d.%d' % VERSION
+
 import time
 
-from django.core.exceptions import ImproperlyConfigured, ValidationError
+try:
+    from django.core.exceptions import ImproperlyConfigured, ValidationError
+    import django
 
-default_app_config = 'dynamicsettings.apps.DynamicSettingsConfig'
+    if django.VERSION < (3, 2):
+        default_app_config = 'dynamicsettings.apps.DynamicSettingsConfig'
+except ModuleNotFoundError:
+    # allow import without having django, for setup.py and others
+    pass
 
 
 class DynamicSetting(object):

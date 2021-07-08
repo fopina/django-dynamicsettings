@@ -1,4 +1,4 @@
-VERSION = (0, 0, 2)
+VERSION = (0, 0, 3)
 __version__ = '%d.%d.%d' % VERSION
 
 import time
@@ -124,6 +124,9 @@ class DynamicSetting(object):
 
     def __str__(self):
         return str(self.__get_dyn_value__())
+
+    def __int__(self):
+        return int(self.__get_dyn_value__())
 
     def __repr__(self):
         return repr(self.__get_dyn_value__())

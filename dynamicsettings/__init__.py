@@ -53,24 +53,6 @@ class DynamicSetting(object):
     def __setattr__(self, name, value):
         raise ValidationError('attributes not supported with DynamicSetting')
 
-    def __nonzero__(self):
-        return bool(self.__get_dyn_value__())
-
-    def __bool__(self):
-        return bool(self.__get_dyn_value__())
-
-    def __str__(self):
-        return str(self.__get_dyn_value__())
-
-    def __repr__(self):
-        return repr(self.__get_dyn_value__())
-
-    def __hash__(self):
-        return hash(self.__get_dyn_value__())
-
-    def __eq__(self, other):
-        return self.__get_dyn_value__() == other
-
     def __get_dyn_value__(self):
         self.__load_cache__()
 
@@ -130,6 +112,79 @@ class DynamicSetting(object):
         # utility method to reset class-level variables (useful for unit-testing - or stuff even hackier than this)
         cls.__cache__ = {}
         cls.__last__cache__ = 0
+
+    # dull/proxy implementation of all operators... maybe there is an easier way...?
+    def __nonzero__(self):
+        return bool(self.__get_dyn_value__())
+
+    def __bool__(self):
+        return bool(self.__get_dyn_value__())
+
+    def __str__(self):
+        return str(self.__get_dyn_value__())
+
+    def __repr__(self):
+        return repr(self.__get_dyn_value__())
+
+    def __hash__(self):
+        return hash(self.__get_dyn_value__())
+
+    def __add__(self, other):
+        return self.__get_dyn_value__() + other
+
+    def __sub__(self, other):
+        return self.__get_dyn_value__() - other
+
+    def __mul__(self, other):
+        return self.__get_dyn_value__() * other
+
+    def __pow__(self, other):
+        return self.__get_dyn_value__() ** other
+
+    def __truediv__(self, other):
+        return self.__get_dyn_value__() / other
+
+    def __floordiv__(self, other):
+        return self.__get_dyn_value__() // other
+
+    def __mod__(self, other):
+        return self.__get_dyn_value__() % other
+
+    def __lshift__(self, other):
+        return self.__get_dyn_value__() << other
+
+    def __rshift__(self, other):
+        return self.__get_dyn_value__() >> other
+
+    def __and__(self, other):
+        return self.__get_dyn_value__() & other
+
+    def __or__(self, other):
+        return self.__get_dyn_value__() | other
+
+    def __xor__(self, other):
+        return self.__get_dyn_value__() ^ other
+
+    def __invert__(self):
+        return ~self.__get_dyn_value__()
+
+    def __lt__(self, other):
+        return self.__get_dyn_value__() < other
+
+    def __le__(self, other):
+        return self.__get_dyn_value__() <= other
+
+    def __eq__(self, other):
+        return self.__get_dyn_value__() == other
+
+    def __ne__(self, other):
+        return self.__get_dyn_value__() != other
+
+    def __gt__(self, other):
+        return self.__get_dyn_value__() > other
+
+    def __ge__(self, other):
+        return self.__get_dyn_value__() >= other
 
 
 def _guess_variable_name_():

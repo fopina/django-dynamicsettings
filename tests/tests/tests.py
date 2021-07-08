@@ -57,6 +57,7 @@ class Test(TestCase):
         c = models.Setting.objects.create(name='TEST_SET_DYNAMIC', value='b')
         c.clean()
         self.assertEqual(settings.TEST_SET_DYNAMIC, 'b')
+        self.assertEqual(settings.TEST_SET_DYNAMIC + 'abe', 'babe')
 
     def test_settings_bool(self):
         var_b = DYN(True)
@@ -64,13 +65,17 @@ class Test(TestCase):
         c = models.Setting.objects.create(name='var_b', value='')
         c.clean()
         self.assertEqual(var_b, False)
+        self.assertEqual(not var_b, True)
 
     def test_settings_int(self):
         var_i = DYN(2)
         self.assertEqual(var_i, 2)
         c = models.Setting.objects.create(name='var_i', value='3')
         c.clean()
+        # reverse __eq__ behaves as well?
+        self.assertEqual(3, var_i)
         self.assertEqual(var_i, 3)
+        self.assertEqual(var_i + 1, 4)
 
     def test_settings_other(self):
         var_o = DYN(None, setting_type=int)
@@ -78,6 +83,10 @@ class Test(TestCase):
         c = models.Setting.objects.create(name='var_o', value='3')
         c.clean()
         self.assertEqual(var_o, 3)
+        self.assertEqual(var_o + 1, 4)
+        self.assertTrue(var_o < 4)
+        self.assertTrue(var_o <= 3)
+        self.assertFalse(var_o <= 2)
 
     # fmt: off
     @override_settings(

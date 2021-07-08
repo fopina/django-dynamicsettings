@@ -77,6 +77,15 @@ class Test(TestCase):
         self.assertEqual(var_i, 3)
         self.assertEqual(var_i + 1, 4)
 
+    def test_settings_int_cast(self):
+        var_i = DYN(2)
+        self.assertEqual(var_i, 2)
+        self.assertEqual(int(var_i), 2)
+        # implementing __instancecheck__ would be nice (for cases like datetime.timedelta that check types)
+        # but should we (instead of just explicit casting)...?
+        self.assertFalse(isinstance(var_i, int))
+        self.assertTrue(isinstance(int(var_i), int))
+
     def test_settings_other(self):
         var_o = DYN(None, setting_type=int)
         self.assertEqual(var_o, None)

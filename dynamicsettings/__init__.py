@@ -32,7 +32,9 @@ class DynamicSetting(object):
         if setting_name is None:
             setting_name = _guess_variable_name_()
         if setting_name is None:
-            raise ImproperlyConfigured('setting_name is required as it could not be inferred from its declaration')
+            raise ImproperlyConfigured(
+                'setting_name is required as it could not be inferred from its declaration'
+            )
         if setting_type is None:
             setting_type = type(setting_value)
             if setting_type not in (bool, str, int):
@@ -80,7 +82,10 @@ class DynamicSetting(object):
         # for lower CACHE_TTLs (as casting values that will not be used...)
         # if cache is at "instance" level instead of class level, then it would be the same
         # but a DB query would be made for each setting...
-        cls.__cache__ = {s.name: cls.cast_type(s.value, name=s.name) for s in Setting.objects.filter(active=True)}
+        cls.__cache__ = {
+            s.name: cls.cast_type(s.value, name=s.name)
+            for s in Setting.objects.filter(active=True)
+        }
         cls.__last__cache__ = time.time()
 
     @classmethod
@@ -101,7 +106,9 @@ class DynamicSetting(object):
     def cast_type(cls, value, name=None, _type=None):
         if _type is None:
             if name is None or name not in cls.__registry__:
-                raise ValidationError('%(name)s is not a valid setting', params={'name': name})
+                raise ValidationError(
+                    '%(name)s is not a valid setting', params={'name': name}
+                )
             _type = cls.__registry__.get(name)
         if _type is bool and isinstance(value, str):
             if value.lower() in ('true', 'yes', '1'):
@@ -124,6 +131,9 @@ class DynamicSetting(object):
 
     def __str__(self):
         return str(self.__get_dyn_value__())
+
+    def __int__(self):
+        return int(self.__get_dyn_value__())
 
     def __repr__(self):
         return repr(self.__get_dyn_value__())
